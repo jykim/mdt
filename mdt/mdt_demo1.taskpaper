@@ -1,0 +1,7 @@
+Prj1:
+- Task1
+- Task2 @done(2017-01-02)
+
+Prj2:
+- Task3 @p(1) @done(2017-01-02)
+- Task4 @p(3) @p(2)

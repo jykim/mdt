@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+from mdt import *
+
+AP = argparse.ArgumentParser(description='Markdown Parser')
+AP.add_argument("command")
+AP.add_argument("-i", "--infile", default = sys.stdin)
+AP.add_argument("-o", "--outfile", default = sys.stdout)
+# diff
+AP.add_argument("-j", "--infile2")
+# stat
+AP.add_argument("-k", "--keys", default = "T1,T2")
+AP.add_argument("-s", "--stats", default = "SC,WC")
+# track
+AP.add_argument("-l", "--logfile")
+AP.add_argument("-t", "--time_to_wait", default = 1)
+AP.add_argument("-f", "--functions")
+# monitor
+AP.add_argument("-n", "--newfile")
+AP.add_argument("-m", "--module")
+AG = AP.parse_args()
+
+if __name__ == '__main__':
+    # Parse MD files
+    if AG.command == 'parse':
+        dta = mp.parse_md_files(AG.infile)
+        dta.to_csv(AG.outfile, sep="\t", index=False)
+    
+    # Add various stats
+    if AG.command == "stat":
+        tbl = pd.read_csv(AG.infile, sep="\t" )
+        if( 'Type' in tbl.columns ):
+            tbs = add_diff_stat(tbl, AG.stats)
+        else:
+            tbs = add_stat(tbl, AG.stats)
+        tbs.to_csv(AG.outfile, sep="\t", index=False)
+
+    # Aggregate by keys
+    if AG.command == "agg":
+        tbs = pd.read_csv(AG.infile, sep="\t")
+        tba = tbs.fillna(0).groupby(AG.keys.split(",")).aggregate(sum)
+        tba.to_csv(AG.outfile, sep="\t")
+
+    # Compare two MD files
+    if AG.command == 'diff':
+        dtm = diff_md_files(AG.infile, AG.infile2)
+        dtm.to_csv(AG.outfile, sep="\t", index=False)
+
+    # Monitor & log changes of a MD file
+    if AG.command == 'track':
+        while True:
+            sleep(int(AG.time_to_wait))
+            ret = track_md_file(AG.infile, AG.outfile, AG.logfile)
+            if(ret > 0 and AG.functions):
+                for fun_name in AG.functions.split(","):
+                    globals()[fun_name]()
+
+
+    # Monitor & log changes of a MD file
+    if AG.command == 'monitor':
+        dta1 = parse_md_files(AG.infile)
+        if AG.outfile == sys.stdout :
+            print "outfile is required"; exit()
+        outfile = open(AG.outfile, "a")
+        if os.path.getsize(AG.outfile) == 0:
+            outfile.write("\t".join(["Time", "Type", "ID", "T1", "T2", "T3", "TXT"])+"\n")
+        while True:
+            sleep(int(AG.time_to_wait))
+            dta2 = parse_md_files(AG.infile)
+            dtm = diff_tbls(dta1, dta2)
+            if len(dtm) > 0:
+                if(AG.newfile):
+                    dta2.to_csv(AG.newfile, sep="\t", index=False)
+                dtm.to_csv(outfile, sep="\t", header=False, index=False)
+                print dtm; outfile.flush()                
+                if(AG.module):
+                    for fun_name in AG.module.split(","):
+                        globals()[fun_name]()
+                dta1 = dta2
+
+    if AG.command == 'test':
+        unittest.main()
