@@ -60,7 +60,7 @@ if __name__ == '__main__':
     if AG.command == 'monitor':
         dta1 = parse_md_files(AG.infile)
         if AG.outfile == sys.stdout :
-            print "outfile is required"; exit()
+            print("outfile is required"); exit()
         outfile = open(AG.outfile, "a")
         if os.path.getsize(AG.outfile) == 0:
             outfile.write("\t".join(["Time", "Type", "ID", "T1", "T2", "T3", "TXT"])+"\n")
@@ -72,7 +72,7 @@ if __name__ == '__main__':
                 if(AG.newfile):
                     dta2.to_csv(AG.newfile, sep="\t", index=False)
                 dtm.to_csv(outfile, sep="\t", header=False, index=False)
-                print dtm; outfile.flush()                
+                print(dtm); outfile.flush()                
                 if(AG.module):
                     for fun_name in AG.module.split(","):
                         globals()[fun_name]()
