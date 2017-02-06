@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='Markdown Tracker',
-      version='0.1',
+      version='0.1.1',
       description='Tools for tracking Markdown & Taskpaper files',
       long_description=readme(),
       classifiers=[
