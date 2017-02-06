@@ -3,23 +3,11 @@
 @author: jink
 """
 from mdt.mdt_init import *
-import dropbox
 P_T1 = r"^# (.*)"
 P_T2 = r"^## (.*)"
 P_T3 = r"^### (.*)"
 P_BLANK = r"^\s*$"
 C_TITLE = "#"
-VERSION = "0.1.2t"
-
-def import_from_dropbox(auth_token, tmp_path = "tmp/"):
-    dbx = dropbox.Dropbox(auth_token)
-    if not os.path.exists(tmp_path):
-        os.mkdir(tmp_path)   
-    for entry in dbx.files_list_folder('').entries:
-        #print(entry.name)
-        md, res = dbx.files_download('/'+entry.name)
-        of = open(os.path.join(tmp_path, md.name), "w")
-        of.write(res.content.decode())
 
 def parse_md_files(fileptn):
     mds = glob.glob(fileptn)
