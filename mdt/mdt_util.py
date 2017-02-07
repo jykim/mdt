@@ -1,3 +1,4 @@
+import dropbox
 from mdt.mdt_init import *
 
 def round_by_minutes(arg, minutes = 1):
@@ -15,3 +16,14 @@ def flattenCols(col,sep = '_'):
                     new_col += sep
                 new_col += level
         return new_col
+
+
+def import_from_dropbox(auth_token, tmp_path = "tmp/"):
+    dbx = dropbox.Dropbox(auth_token)
+    if not os.path.exists(tmp_path):
+        os.mkdir(tmp_path)   
+    for entry in dbx.files_list_folder('').entries:
+        #print(entry.name)
+        md, res = dbx.files_download('/'+entry.name)
+        of = open(os.path.join(tmp_path, md.name), "w")
+        of.write(res.content.decode())
