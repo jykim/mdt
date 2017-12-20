@@ -1,3 +1,4 @@
+import io
 import dropbox
 from mdt.mdt_init import *
 
@@ -25,5 +26,5 @@ def import_from_dropbox(auth_token, tmp_path = "tmp/"):
     for entry in dbx.files_list_folder('').entries:
         #print(entry.name)
         md, res = dbx.files_download('/'+entry.name)
-        of = open(os.path.join(tmp_path, md.name), "w")
-        of.write(res.content.decode())
+        with io.open(os.path.join(tmp_path, md.name), "w", encoding='utf-8') as of:
+            of.write(res.content.decode('utf-8'))
